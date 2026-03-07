@@ -28,9 +28,6 @@ A professional, feature-rich implementation of Gomoku (Five in a Row) built with
 
 ## Getting Started
 
-### Online Play
-Visit the live game at: **[https://neoleegm.github.io/gomoku-pro](https://neoleegm.github.io/gomoku-pro)**
-
 ### Local Development
 
 **Prerequisites**
@@ -163,7 +160,5 @@ This project is open source and available under the MIT License.
 Developed with ❤️ using modern web technologies. Inspired by the classic game of Gomoku and contemporary game design principles.
 
 ---
-
-**Play now**: [https://neoleegm.github.io/gomoku-pro](https://neoleegm.github.io/gomoku-pro)
 
 **Repository**: [https://github.com/neoleegm/gomoku-pro](https://github.com/neoleegm/gomoku-pro)
