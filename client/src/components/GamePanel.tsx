@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Bot, RotateCcw, Undo2, Users } from 'lucide-react';
+import { Bot, RotateCcw, Undo2, Users, Volume2, VolumeX } from 'lucide-react';
 
 interface GamePanelProps {
   gameState: GameState;
@@ -20,9 +20,11 @@ interface GamePanelProps {
   onNewGame: () => void;
   onUndo: () => void;
   canUndo: boolean;
+  soundEnabled: boolean;
   onModeChange: (mode: GameMode) => void;
   onDifficultyChange: (difficulty: AIDifficulty) => void;
   onHumanPlayerChange: (player: Player) => void;
+  onSoundEnabledChange: (enabled: boolean) => void;
 }
 
 const difficultyLabel: Record<AIDifficulty, string> = {
@@ -37,9 +39,11 @@ export default function GamePanel({
   onNewGame,
   onUndo,
   canUndo,
+  soundEnabled,
   onModeChange,
   onDifficultyChange,
   onHumanPlayerChange,
+  onSoundEnabledChange,
 }: GamePanelProps) {
   const status = getStatusText(gameState, aiPlayer);
 
@@ -119,6 +123,33 @@ export default function GamePanel({
               </label>
             </>
           )}
+        </div>
+      </section>
+
+      <section className="rounded-md border border-border bg-panel p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-muted-foreground">
+              Sound
+            </p>
+            <p className="text-sm text-foreground">
+              {soundEnabled ? 'Business tone cues on' : 'Muted'}
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onSoundEnabledChange(!soundEnabled)}
+            aria-pressed={soundEnabled}
+          >
+            {soundEnabled ? (
+              <Volume2 className="h-4 w-4" />
+            ) : (
+              <VolumeX className="h-4 w-4" />
+            )}
+            {soundEnabled ? 'On' : 'Off'}
+          </Button>
         </div>
       </section>
 

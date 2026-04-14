@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getAIMove } from '@/lib/gomokuAI';
+import { useGameAudio } from '@/hooks/useGameAudio';
 import {
   AIDifficulty,
   GameMode,
@@ -23,6 +24,14 @@ export default function Home() {
       humanPlayer: 'black',
     })
   );
+
+  const {
+    soundEnabled,
+    setSoundEnabled,
+    playMove,
+    playWin,
+    playLoss,
+  } = useGameAudio();
 
   const aiPlayer = useMemo(
     () => getOpponent(gameState.humanPlayer),
@@ -55,10 +64,19 @@ export default function Home() {
         ) {
           return { ...current, aiThinking: false };
         }
-        return makeMove({ ...current, aiThinking: false }, aiMove.row, aiMove.col, aiPlayerSnapshot);
+        const nextState = makeMove({ ...current, aiThinking: false }, aiMove.row, aiMove.col, aiPlayerSnapshot);
+        playMove();
+        if (nextState.gameOver && nextState.winner) {
+          if (nextState.winner === current.humanPlayer) {
+            playWin();
+          } else {
+            playLoss();
+          }
+        }
+        return nextState;
       });
     }, 280);
-  }, [aiPlayer, gameState]);
+  }, [aiPlayer, gameState, playLoss, playMove, playWin]);
 
   const handleCellClick = (row: number, col: number) => {
     if (
@@ -68,7 +86,16 @@ export default function Home() {
     ) {
       return;
     }
-    setGameState((current) => makeMove(current, row, col));
+    setGameState((current) => {
+      const nextState = makeMove(current, row, col);
+      if (nextState !== current) {
+        playMove();
+        if (nextState.gameOver && nextState.winner) {
+          playWin();
+        }
+      }
+      return nextState;
+    });
   };
 
   const handleNewGame = () => {
@@ -106,9 +133,11 @@ export default function Home() {
           onNewGame={handleNewGame}
           onUndo={handleUndo}
           canUndo={gameState.moveHistory.length > 0 && !gameState.aiThinking}
+          soundEnabled={soundEnabled}
           onModeChange={handleModeChange}
           onDifficultyChange={handleDifficultyChange}
           onHumanPlayerChange={handleHumanPlayerChange}
+          onSoundEnabledChange={setSoundEnabled}
         />
       </div>
     </div>

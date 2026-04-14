@@ -18,6 +18,7 @@ A professional, feature-rich implementation of Gomoku (Five in a Row) built with
 - **Competitive Board Theme**: Fresh green board surface with crisp contrast and distinct AI markers
 - **Responsive Design**: Seamlessly adapts from mobile phones to desktop screens
 - **Smooth Animations**: Stone placement animations and move indicator pulses provide satisfying feedback
+- **Business Tone Sound Cues**: Subtle Web Audio cues for stone placement, wins, and losses, with a mute toggle
 - **Intuitive Controls**: Click any empty cell to place a stone; hover previews show available moves
 - **Move History Panel**: Displays all moves in algebraic notation (A1, B2, etc.)
 
@@ -70,7 +71,8 @@ pnpm check
 4. **Placing Stones**: Click any empty cell on the board to place your stone
 5. **Winning**: First player to get 5 stones in a row wins
 6. **Undo**: PvP takes back one move; PvE takes back the latest player/AI turn pair
-7. **New Game**: Click "New Game" to restart with the current settings
+7. **Sound**: Use the Sound toggle to keep the subtle move and result cues on or muted
+8. **New Game**: Click "New Game" to restart with the current settings
 
 ## Project Structure
 
@@ -117,6 +119,7 @@ gomoku-pro/
 - Stones scale in smoothly when placed (150ms ease-out)
 - Last move and AI move indicators stay visible after each turn
 - Hover previews provide clear feedback on available moves
+- Move, win, and loss sounds use short synthesized tones designed to stay understated
 - AI moves run locally in the browser without server calls
 
 ## Technologies Used
