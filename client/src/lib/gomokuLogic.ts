@@ -2,15 +2,35 @@
 // Board size: 15x15
 // Win condition: 5 stones in a row (horizontal, vertical, or diagonal)
 
-export type Stone = 'black' | 'white' | null;
+export type Player = 'black' | 'white';
+export type Stone = Player | null;
 export type Board = Stone[][];
+export type GameMode = 'pvp' | 'pve';
+export type AIDifficulty = 'easy' | 'medium' | 'hard';
+
+export interface GameMove {
+  row: number;
+  col: number;
+  player: Player;
+}
 
 export interface GameState {
   board: Board;
-  currentPlayer: 'black' | 'white';
-  moveHistory: Array<{ row: number; col: number; player: 'black' | 'white' }>;
+  currentPlayer: Player;
+  moveHistory: GameMove[];
   gameOver: boolean;
-  winner: 'black' | 'white' | null;
+  winner: Player | null;
+  gameMode: GameMode;
+  difficulty: AIDifficulty;
+  humanPlayer: Player;
+  aiThinking: boolean;
+}
+
+export interface GameOptions {
+  gameMode?: GameMode;
+  difficulty?: AIDifficulty;
+  humanPlayer?: Player;
+  aiThinking?: boolean;
 }
 
 export interface GamePosition {
@@ -18,8 +38,8 @@ export interface GamePosition {
   col: number;
 }
 
-const BOARD_SIZE = 15;
-const WIN_LENGTH = 5;
+export const BOARD_SIZE = 15;
+export const WIN_LENGTH = 5;
 
 /**
  * Initialize an empty game board
@@ -30,17 +50,33 @@ export function createEmptyBoard(): Board {
     .map(() => Array(BOARD_SIZE).fill(null));
 }
 
+export function getOpponent(player: Player): Player {
+  return player === 'black' ? 'white' : 'black';
+}
+
 /**
  * Initialize a new game state
  */
-export function initializeGame(): GameState {
+export function initializeGame(options: GameOptions = {}): GameState {
   return {
     board: createEmptyBoard(),
     currentPlayer: 'black',
     moveHistory: [],
     gameOver: false,
     winner: null,
+    gameMode: options.gameMode ?? 'pvp',
+    difficulty: options.difficulty ?? 'easy',
+    humanPlayer: options.humanPlayer ?? 'black',
+    aiThinking: options.aiThinking ?? false,
   };
+}
+
+export function resetGame(gameState: GameState): GameState {
+  return initializeGame({
+    gameMode: gameState.gameMode,
+    difficulty: gameState.difficulty,
+    humanPlayer: gameState.humanPlayer,
+  });
 }
 
 /**
@@ -60,7 +96,7 @@ export function placeStone(
   board: Board,
   row: number,
   col: number,
-  player: Stone
+  player: Player
 ): Board {
   const newBoard = board.map((r) => [...r]);
   newBoard[row][col] = player;
@@ -78,30 +114,27 @@ export function checkWin(
 ): boolean {
   if (player === null) return false;
 
-  // Directions: horizontal, vertical, diagonal-right, diagonal-left
   const directions = [
-    [0, 1], // horizontal
-    [1, 0], // vertical
-    [1, 1], // diagonal-right
-    [1, -1], // diagonal-left
+    [0, 1],
+    [1, 0],
+    [1, 1],
+    [1, -1],
   ];
 
   for (const [dr, dc] of directions) {
-    let count = 1; // Count the current stone
+    let count = 1;
 
-    // Count in positive direction
     let r = row + dr;
     let c = col + dc;
-    while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && board[r][c] === player) {
+    while (isInBounds(r, c) && board[r][c] === player) {
       count++;
       r += dr;
       c += dc;
     }
 
-    // Count in negative direction
     r = row - dr;
     c = col - dc;
-    while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && board[r][c] === player) {
+    while (isInBounds(r, c) && board[r][c] === player) {
       count++;
       r -= dr;
       c -= dc;
@@ -115,57 +148,94 @@ export function checkWin(
   return false;
 }
 
+export function getLegalMoves(board: Board): GamePosition[] {
+  const moves: GamePosition[] = [];
+  for (let row = 0; row < BOARD_SIZE; row++) {
+    for (let col = 0; col < BOARD_SIZE; col++) {
+      if (board[row][col] === null) {
+        moves.push({ row, col });
+      }
+    }
+  }
+  return moves;
+}
+
+export function isBoardFull(board: Board): boolean {
+  return getLegalMoves(board).length === 0;
+}
+
 /**
  * Make a move in the game
  */
 export function makeMove(
   gameState: GameState,
   row: number,
-  col: number
+  col: number,
+  player: Player = gameState.currentPlayer
 ): GameState {
   if (!isValidMove(gameState.board, row, col) || gameState.gameOver) {
     return gameState;
   }
 
-  const newBoard = placeStone(gameState.board, row, col, gameState.currentPlayer);
+  const newBoard = placeStone(gameState.board, row, col, player);
   const newMoveHistory = [
     ...gameState.moveHistory,
-    { row, col, player: gameState.currentPlayer },
+    { row, col, player },
   ];
 
-  const isWin = checkWin(newBoard, row, col, gameState.currentPlayer);
+  const isWin = checkWin(newBoard, row, col, player);
+  const isDraw = !isWin && isBoardFull(newBoard);
 
   return {
+    ...gameState,
     board: newBoard,
-    currentPlayer: gameState.currentPlayer === 'black' ? 'white' : 'black',
+    currentPlayer: getOpponent(player),
     moveHistory: newMoveHistory,
-    gameOver: isWin,
-    winner: isWin ? gameState.currentPlayer : null,
+    gameOver: isWin || isDraw,
+    winner: isWin ? player : null,
+    aiThinking: false,
+  };
+}
+
+export function updateGameOptions(gameState: GameState, options: GameOptions): GameState {
+  return {
+    ...resetGame({
+      ...gameState,
+      ...options,
+    }),
+    ...options,
   };
 }
 
 /**
- * Undo the last move
+ * Undo the last move for PvP, or the latest human/AI turn pair for PvE.
  */
 export function undoMove(gameState: GameState): GameState {
-  if (gameState.moveHistory.length === 0) {
+  if (gameState.moveHistory.length === 0 || gameState.aiThinking) {
     return gameState;
   }
 
-  const newMoveHistory = gameState.moveHistory.slice(0, -1);
-  const newBoard = createEmptyBoard();
+  const undoCount = gameState.gameMode === 'pve'
+    ? Math.min(2, gameState.moveHistory.length)
+    : 1;
+  const newMoveHistory = gameState.moveHistory.slice(0, -undoCount);
+  return rebuildGameState(gameState, newMoveHistory);
+}
 
-  // Rebuild board from move history (excluding the last move)
-  for (const move of newMoveHistory) {
+export function rebuildGameState(gameState: GameState, moveHistory: GameMove[]): GameState {
+  const newBoard = createEmptyBoard();
+  for (const move of moveHistory) {
     newBoard[move.row][move.col] = move.player;
   }
 
   return {
+    ...gameState,
     board: newBoard,
-    currentPlayer: gameState.currentPlayer === 'black' ? 'white' : 'black',
-    moveHistory: newMoveHistory,
+    currentPlayer: moveHistory.length % 2 === 0 ? 'black' : 'white',
+    moveHistory,
     gameOver: false,
     winner: null,
+    aiThinking: false,
   };
 }
 
@@ -178,4 +248,8 @@ export function getLastMove(gameState: GameState): GamePosition | null {
   }
   const lastMove = gameState.moveHistory[gameState.moveHistory.length - 1];
   return { row: lastMove.row, col: lastMove.col };
+}
+
+export function isInBounds(row: number, col: number): boolean {
+  return row >= 0 && row < BOARD_SIZE && col >= 0 && col < BOARD_SIZE;
 }

@@ -3,7 +3,9 @@ import { cn } from '@/lib/utils';
 
 interface BoardCellProps {
   stone: Stone;
+  previewStone: Stone;
   isLastMove: boolean;
+  isAiMove: boolean;
   isHoverable: boolean;
   onClick: () => void;
   onHover: (isHovering: boolean) => void;
@@ -11,55 +13,50 @@ interface BoardCellProps {
 
 export default function BoardCell({
   stone,
+  previewStone,
   isLastMove,
+  isAiMove,
   isHoverable,
   onClick,
   onHover,
 }: BoardCellProps) {
+  const displayStone = stone ?? previewStone;
+
   return (
-    <div
+    <button
+      type="button"
+      aria-label="Place stone"
+      disabled={!isHoverable}
       className={cn(
-        'w-full aspect-square relative border border-border/30 transition-colors duration-200',
-        isHoverable && 'cursor-pointer hover:bg-accent/20'
+        'relative aspect-square w-full border border-board-line/50 bg-board-cell transition-colors duration-150',
+        'focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+        isHoverable && 'hover:bg-board-hover active:bg-board-active',
+        !isHoverable && 'cursor-default'
       )}
       onClick={onClick}
       onMouseEnter={() => onHover(true)}
       onMouseLeave={() => onHover(false)}
     >
-      {/* Stone */}
-      {stone && (
-        <div
+      {displayStone && (
+        <span
           className={cn(
-            'absolute inset-0 flex items-center justify-center animate-stone-place',
-            stone === 'black' ? 'bg-black' : 'bg-white'
+            'absolute left-1/2 top-1/2 block h-[78%] w-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-150',
+            stone ? 'animate-stone-place' : 'opacity-35',
+            displayStone === 'black'
+              ? 'bg-stone-black shadow-stone-black'
+              : 'bg-stone-white shadow-stone-white'
           )}
-          style={{
-            borderRadius: '50%',
-            width: '85%',
-            height: '85%',
-            left: '7.5%',
-            top: '7.5%',
-            boxShadow:
-              stone === 'black'
-                ? '0 4px 12px rgba(0, 0, 0, 0.5), inset -2px -2px 4px rgba(0, 0, 0, 0.3)'
-                : '0 4px 12px rgba(0, 0, 0, 0.3), inset -2px -2px 4px rgba(0, 0, 0, 0.1)',
-          }}
         />
       )}
 
-      {/* Last move indicator */}
       {isLastMove && stone && (
-        <div
-          className="absolute inset-0 flex items-center justify-center animate-pulse-ring"
-          style={{
-            borderRadius: '50%',
-            width: '85%',
-            height: '85%',
-            left: '7.5%',
-            top: '7.5%',
-          }}
+        <span
+          className={cn(
+            'absolute left-1/2 top-1/2 h-[34%] w-[34%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2',
+            isAiMove ? 'border-ai-marker bg-ai-marker/20' : 'border-primary bg-primary/20'
+          )}
         />
       )}
-    </div>
+    </button>
   );
 }

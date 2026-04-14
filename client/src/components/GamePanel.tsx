@@ -1,90 +1,189 @@
-import { GameState } from '@/lib/gomokuLogic';
+import {
+  AIDifficulty,
+  GameMode,
+  GameState,
+  Player,
+} from '@/lib/gomokuLogic';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, Undo2 } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Bot, RotateCcw, Undo2, Users } from 'lucide-react';
 
 interface GamePanelProps {
   gameState: GameState;
+  aiPlayer: Player;
   onNewGame: () => void;
   onUndo: () => void;
   canUndo: boolean;
+  onModeChange: (mode: GameMode) => void;
+  onDifficultyChange: (difficulty: AIDifficulty) => void;
+  onHumanPlayerChange: (player: Player) => void;
 }
+
+const difficultyLabel: Record<AIDifficulty, string> = {
+  easy: 'Easy',
+  medium: 'Medium',
+  hard: 'Hard',
+};
 
 export default function GamePanel({
   gameState,
+  aiPlayer,
   onNewGame,
   onUndo,
   canUndo,
+  onModeChange,
+  onDifficultyChange,
+  onHumanPlayerChange,
 }: GamePanelProps) {
+  const status = getStatusText(gameState, aiPlayer);
+
   return (
-    <div className="w-full md:w-80 flex flex-col gap-6 p-4 md:p-6">
-      {/* Game Title */}
-      <div className="text-center">
-        <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-2">
+    <aside className="w-full lg:w-88 flex flex-col gap-5 p-4 sm:p-5 lg:p-6">
+      <div>
+        <h1 className="text-3xl font-display font-bold text-foreground">
           Gomoku Pro
         </h1>
         <p className="text-sm text-muted-foreground">Five in a Row</p>
       </div>
 
-      {/* Game Status */}
-      <div className="bg-card rounded-lg p-4 border border-border">
-        <div className="mb-3">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
-            Current Player
-          </p>
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-6 h-6 rounded-full transition-all ${
-                gameState.currentPlayer === 'black'
-                  ? 'bg-black shadow-lg scale-110'
-                  : 'bg-white border-2 border-border'
-              }`}
-            />
-            <span className="text-lg font-semibold text-foreground capitalize">
-              {gameState.currentPlayer}
-            </span>
+      <section className="rounded-md border border-border bg-panel p-4">
+        <p className="mb-3 text-sm font-semibold text-muted-foreground">
+          Match
+        </p>
+        <div className="grid gap-3">
+          <label className="grid gap-2 text-sm">
+            <span className="text-muted-foreground">Mode</span>
+            <Select
+              value={gameState.gameMode}
+              onValueChange={(value) => onModeChange(value as GameMode)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pve">
+                  <span className="flex items-center gap-2">
+                    <Bot className="h-4 w-4" />
+                    Player vs AI
+                  </span>
+                </SelectItem>
+                <SelectItem value="pvp">
+                  <span className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Local two-player
+                  </span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </label>
+
+          {gameState.gameMode === 'pve' && (
+            <>
+              <label className="grid gap-2 text-sm">
+                <span className="text-muted-foreground">Difficulty</span>
+                <Select
+                  value={gameState.difficulty}
+                  onValueChange={(value) => onDifficultyChange(value as AIDifficulty)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="easy">Easy</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="hard">Hard</SelectItem>
+                  </SelectContent>
+                </Select>
+              </label>
+
+              <label className="grid gap-2 text-sm">
+                <span className="text-muted-foreground">Your Stones</span>
+                <Select
+                  value={gameState.humanPlayer}
+                  onValueChange={(value) => onHumanPlayerChange(value as Player)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="black">Black, first move</SelectItem>
+                    <SelectItem value="white">White, AI opens</SelectItem>
+                  </SelectContent>
+                </Select>
+              </label>
+            </>
+          )}
+        </div>
+      </section>
+
+      <section className="rounded-md border border-border bg-panel p-4">
+        <p className="mb-2 text-sm font-semibold text-muted-foreground">
+          Status
+        </p>
+        <div className="flex items-center gap-3">
+          <span
+            className={`h-6 w-6 rounded-full ${
+              gameState.currentPlayer === 'black'
+                ? 'bg-stone-black shadow-stone-black'
+                : 'bg-stone-white shadow-stone-white'
+            }`}
+          />
+          <div className="min-w-0">
+            <p className="text-base font-semibold text-foreground">{status}</p>
+            <p className="text-sm text-muted-foreground">
+              Moves: <span className="font-semibold text-foreground">{gameState.moveHistory.length}</span>
+            </p>
           </div>
         </div>
-
-        {/* Move count */}
-        <div className="text-sm text-muted-foreground">
-          Moves: <span className="font-semibold text-foreground">{gameState.moveHistory.length}</span>
-        </div>
-      </div>
-
-      {/* Game Over Status */}
-      {gameState.gameOver && gameState.winner && (
-        <div className="bg-accent/20 border border-accent rounded-lg p-4">
-          <p className="text-sm text-muted-foreground mb-1">Game Over!</p>
-          <p className="text-xl font-display font-bold text-accent capitalize">
-            {gameState.winner} wins!
+        {gameState.gameMode === 'pve' && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            AI: {difficultyLabel[gameState.difficulty]} as {aiPlayer}
           </p>
-        </div>
+        )}
+      </section>
+
+      {gameState.gameOver && (
+        <section className="rounded-md border border-primary bg-primary/10 p-4">
+          <p className="text-sm text-muted-foreground">
+            {gameState.winner ? 'Winner' : 'Draw'}
+          </p>
+          <p className="text-xl font-display font-bold text-primary">
+            {gameState.winner ? `${gameState.winner} wins` : 'Board full'}
+          </p>
+        </section>
       )}
 
-      {/* Move History */}
-      <div className="flex-1 min-h-0">
-        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
+      <section className="min-h-0 flex-1">
+        <p className="mb-3 text-sm font-semibold text-muted-foreground">
           Move History
         </p>
-        <div className="bg-card rounded-lg border border-border p-3 h-32 overflow-y-auto">
+        <div className="h-36 overflow-y-auto rounded-md border border-border bg-panel p-2">
           {gameState.moveHistory.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
+            <p className="py-5 text-center text-sm text-muted-foreground">
               No moves yet
             </p>
           ) : (
-            <div className="space-y-1">
+            <div className="grid gap-1">
               {gameState.moveHistory.map((move, index) => (
                 <div
-                  key={index}
-                  className="text-sm text-foreground flex justify-between items-center p-2 hover:bg-muted/50 rounded transition-colors"
+                  key={`${move.row}-${move.col}-${index}`}
+                  className="flex items-center justify-between rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted/50"
                 >
                   <span className="font-mono">
                     {index + 1}. {String.fromCharCode(65 + move.col)}
                     {move.row + 1}
                   </span>
                   <span
-                    className={`w-3 h-3 rounded-full ${
-                      move.player === 'black' ? 'bg-black' : 'bg-white border border-border'
+                    className={`h-3 w-3 rounded-full ${
+                      move.player === 'black'
+                        ? 'bg-stone-black'
+                        : 'bg-stone-white border border-border'
                     }`}
                   />
                 </div>
@@ -92,40 +191,45 @@ export default function GamePanel({
             </div>
           )}
         </div>
-      </div>
+      </section>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3">
+      <div className="grid grid-cols-2 gap-3">
         <Button
           onClick={onUndo}
           disabled={!canUndo}
           variant="outline"
-          className="flex-1"
           size="sm"
         >
-          <Undo2 className="w-4 h-4 mr-2" />
+          <Undo2 className="h-4 w-4" />
           Undo
         </Button>
-        <Button
-          onClick={onNewGame}
-          variant="default"
-          className="flex-1"
-          size="sm"
-        >
-          <RotateCcw className="w-4 h-4 mr-2" />
+        <Button onClick={onNewGame} variant="default" size="sm">
+          <RotateCcw className="h-4 w-4" />
           New Game
         </Button>
       </div>
 
-      {/* Instructions */}
-      <div className="text-xs text-muted-foreground space-y-2 pt-4 border-t border-border">
-        <p>
-          <strong>Goal:</strong> Get 5 stones in a row (horizontal, vertical, or diagonal)
-        </p>
-        <p>
-          <strong>Players:</strong> Black starts first, then players alternate
-        </p>
+      <div className="rounded-md border border-border bg-panel p-3 text-sm text-muted-foreground">
+        Black moves first. Place five stones in a straight line to win.
       </div>
-    </div>
+    </aside>
   );
+}
+
+function getStatusText(gameState: GameState, aiPlayer: Player): string {
+  if (gameState.gameOver) {
+    return gameState.winner ? `${gameState.winner} wins` : 'Draw';
+  }
+
+  if (gameState.aiThinking) {
+    return 'AI is thinking';
+  }
+
+  if (gameState.gameMode === 'pve') {
+    return gameState.currentPlayer === aiPlayer
+      ? 'AI to move'
+      : 'Your move';
+  }
+
+  return `${gameState.currentPlayer} to move`;
 }
