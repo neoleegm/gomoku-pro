@@ -33,6 +33,7 @@ describe('gomoku logic', () => {
     expect(undone.currentPlayer).toBe('black');
     expect(undone.board[7][7]).toBeNull();
     expect(undone.board[7][8]).toBeNull();
+    expect(undone.stonesPlaced).toBe(0);
   });
 
   it('returns to the human after the AI opening move when the player chooses white', () => {
@@ -41,6 +42,21 @@ describe('gomoku logic', () => {
 
     expect(gameState.currentPlayer).toBe('white');
     expect(gameState.moveHistory).toHaveLength(1);
+    expect(gameState.stonesPlaced).toBe(1);
+  });
+
+  it('tracks stonesPlaced correctly through moves and undo', () => {
+    let gameState = initializeGame({ gameMode: 'pvp' });
+    expect(gameState.stonesPlaced).toBe(0);
+
+    gameState = makeMove(gameState, 7, 7);
+    expect(gameState.stonesPlaced).toBe(1);
+
+    gameState = makeMove(gameState, 7, 8);
+    expect(gameState.stonesPlaced).toBe(2);
+
+    gameState = undoMove(gameState);
+    expect(gameState.stonesPlaced).toBe(1);
   });
 
   it('returns legal moves for every difficulty', () => {

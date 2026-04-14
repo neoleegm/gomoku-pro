@@ -1,5 +1,5 @@
 import { GameState, Player, getLastMove } from '@/lib/gomokuLogic';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import BoardCell from './BoardCell';
 
 interface GomokuBoardProps {
@@ -14,6 +14,20 @@ export default function GomokuBoard({ gameState, humanPlayer, onCellClick }: Gom
   const isHumanTurn =
     gameState.gameMode === 'pvp' ||
     (!gameState.aiThinking && gameState.currentPlayer === humanPlayer);
+
+  const handleCellClick = useCallback(
+    (row: number, col: number) => () => {
+      onCellClick(row, col);
+    },
+    [onCellClick]
+  );
+
+  const handleHover = useCallback(
+    (row: number, col: number) => (isHovering: boolean) => {
+      setHoveredCell(isHovering ? { row, col } : null);
+    },
+    []
+  );
 
   return (
     <main className="flex-1 flex items-center justify-center px-3 py-4 sm:p-6 lg:p-8">
@@ -53,12 +67,8 @@ export default function GomokuBoard({ gameState, humanPlayer, onCellClick }: Gom
                     isLastMove={isLastMove}
                     isAiMove={isAiMove}
                     isHoverable={isHoverable}
-                    onClick={() => onCellClick(rowIndex, colIndex)}
-                    onHover={(isHovering) => {
-                      setHoveredCell(
-                        isHovering ? { row: rowIndex, col: colIndex } : null
-                      );
-                    }}
+                    onClick={handleCellClick(rowIndex, colIndex)}
+                    onHover={handleHover(rowIndex, colIndex)}
                   />
                 );
               })

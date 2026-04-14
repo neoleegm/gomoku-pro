@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Stone } from '@/lib/gomokuLogic';
 import { cn } from '@/lib/utils';
 
@@ -11,7 +12,7 @@ interface BoardCellProps {
   onHover: (isHovering: boolean) => void;
 }
 
-export default function BoardCell({
+function BoardCell({
   stone,
   previewStone,
   isLastMove,
@@ -60,3 +61,5 @@ export default function BoardCell({
     </button>
   );
 }
+
+export default memo(BoardCell);

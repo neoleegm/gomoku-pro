@@ -170,11 +170,6 @@
     padding-right: 1rem;
   }
 
-  .flex {
-    min-height: 0;
-    min-width: 0;
-  }
-
   .font-display {
     font-family: 'Playfair Display', serif;
   }

@@ -24,6 +24,7 @@ export interface GameState {
   difficulty: AIDifficulty;
   humanPlayer: Player;
   aiThinking: boolean;
+  stonesPlaced: number;
 }
 
 export interface GameOptions {
@@ -68,6 +69,7 @@ export function initializeGame(options: GameOptions = {}): GameState {
     difficulty: options.difficulty ?? 'easy',
     humanPlayer: options.humanPlayer ?? 'black',
     aiThinking: options.aiThinking ?? false,
+    stonesPlaced: 0,
   };
 }
 
@@ -164,6 +166,10 @@ export function isBoardFull(board: Board): boolean {
   return getLegalMoves(board).length === 0;
 }
 
+export function isBoardFullByCount(stonesPlaced: number): boolean {
+  return stonesPlaced >= BOARD_SIZE * BOARD_SIZE;
+}
+
 /**
  * Make a move in the game
  */
@@ -184,7 +190,8 @@ export function makeMove(
   ];
 
   const isWin = checkWin(newBoard, row, col, player);
-  const isDraw = !isWin && isBoardFull(newBoard);
+  const stonesPlaced = gameState.stonesPlaced + 1;
+  const isDraw = !isWin && isBoardFullByCount(stonesPlaced);
 
   return {
     ...gameState,
@@ -194,6 +201,7 @@ export function makeMove(
     gameOver: isWin || isDraw,
     winner: isWin ? player : null,
     aiThinking: false,
+    stonesPlaced,
   };
 }
 
@@ -236,6 +244,7 @@ export function rebuildGameState(gameState: GameState, moveHistory: GameMove[]):
     gameOver: false,
     winner: null,
     aiThinking: false,
+    stonesPlaced: moveHistory.length,
   };
 }
 
