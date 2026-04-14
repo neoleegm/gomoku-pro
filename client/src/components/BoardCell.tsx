@@ -28,7 +28,7 @@ export default function BoardCell({
       aria-label="Place stone"
       disabled={!isHoverable}
       className={cn(
-        'relative aspect-square w-full border border-board-line/50 bg-board-cell transition-colors duration-150',
+        'wood-cell relative aspect-square w-full border border-board-line/45 bg-board-cell transition-colors duration-150',
         'focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         isHoverable && 'hover:bg-board-hover active:bg-board-active',
         !isHoverable && 'cursor-default'

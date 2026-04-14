@@ -15,7 +15,7 @@ A professional, feature-rich implementation of Gomoku (Five in a Row) built with
 - New Game button to restart anytime
 
 **User Experience**
-- **Competitive Board Theme**: Fresh green board surface with crisp contrast and distinct AI markers
+- **Light Wood Board Theme**: Warm pale-yellow wood texture with crisp contrast and distinct AI markers
 - **Responsive Design**: Seamlessly adapts from mobile phones to desktop screens
 - **Smooth Animations**: Stone placement animations and move indicator pulses provide satisfying feedback
 - **Business Tone Sound Cues**: Subtle Web Audio cues for stone placement, wins, and losses, with a mute toggle
@@ -106,7 +106,7 @@ gomoku-pro/
 **Clear Competitive Focus** - The design keeps the board as the main experience and uses compact controls for mode, difficulty, side selection, undo, and move review.
 
 **Color Palette**
-- **Board Background**: Fresh tournament green for high contrast
+- **Board Background**: Pale yellow wood grain with warm brown grid lines
 - **Black Stones**: Pure black with subtle shadow depth
 - **White Stones**: Off-white with soft anti-aliasing
 - **Accents**: Coral and blue markers for current actions and AI moves

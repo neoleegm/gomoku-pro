@@ -23,9 +23,9 @@ export default function GomokuBoard({ gameState, humanPlayer, onCellClick }: Gom
           <span>{gameState.aiThinking ? 'AI is thinking' : 'Five stones win'}</span>
         </div>
 
-        <div className="aspect-square rounded-md border border-board-line/60 bg-board p-2 shadow-board sm:p-4">
+        <div className="wood-board aspect-square rounded-md border border-board-line/60 bg-board p-2 shadow-board sm:p-4">
           <div
-            className="h-full w-full grid gap-0 rounded-sm overflow-hidden border border-board-line/50"
+            className="h-full w-full grid gap-0 rounded-sm overflow-hidden border border-board-line/70"
             style={{ gridTemplateColumns: 'repeat(15, 1fr)' }}
           >
             {gameState.board.map((row, rowIndex) =>
