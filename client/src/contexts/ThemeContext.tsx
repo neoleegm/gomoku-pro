@@ -8,7 +8,13 @@ interface ThemeContextType {
   switchable: boolean;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const DEFAULT_THEME_CONTEXT: ThemeContextType = {
+  theme: 'light' as const,
+  toggleTheme: undefined,
+  switchable: false,
+};
+
+const ThemeContext = createContext<ThemeContextType>(DEFAULT_THEME_CONTEXT);
 
 interface ThemeProviderProps {
   children: React.ReactNode;
@@ -56,9 +62,5 @@ export function ThemeProvider({
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useTheme must be used within ThemeProvider");
-  }
-  return context;
+  return useContext(ThemeContext);
 }

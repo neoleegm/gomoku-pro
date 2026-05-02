@@ -206,13 +206,10 @@ export function makeMove(
 }
 
 export function updateGameOptions(gameState: GameState, options: GameOptions): GameState {
-  return {
-    ...resetGame({
-      ...gameState,
-      ...options,
-    }),
+  return resetGame({
+    ...gameState,
     ...options,
-  };
+  });
 }
 
 /**

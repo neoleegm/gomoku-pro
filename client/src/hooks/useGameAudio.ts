@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 type Tone = {
   frequency: number;
@@ -44,6 +44,16 @@ export function useGameAudio() {
       oscillator.stop(now + tone.start + tone.duration + 0.02);
     }
   }, [getAudioContext]);
+
+  // Close AudioContext on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+    };
+  }, []);
 
   const playMove = useCallback(() => {
     playTones([

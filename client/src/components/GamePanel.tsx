@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import {
   AIDifficulty,
   GameMode,
@@ -46,6 +47,9 @@ export default function GamePanel({
   onSoundEnabledChange,
 }: GamePanelProps) {
   const status = getStatusText(gameState, aiPlayer);
+  const modeLabelId = useId();
+  const difficultyLabelId = useId();
+  const playerLabelId = useId();
 
   return (
     <aside className="w-full lg:w-88 flex flex-col gap-5 p-4 sm:p-5 lg:p-6">
@@ -61,13 +65,13 @@ export default function GamePanel({
           Match
         </p>
         <div className="grid gap-3">
-          <label className="grid gap-2 text-sm">
+          <label className="grid gap-2 text-sm" htmlFor={modeLabelId}>
             <span className="text-muted-foreground">Mode</span>
             <Select
               value={gameState.gameMode}
               onValueChange={(value) => onModeChange(value as GameMode)}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full" id={modeLabelId}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -89,13 +93,13 @@ export default function GamePanel({
 
           {gameState.gameMode === 'pve' && (
             <>
-              <label className="grid gap-2 text-sm">
+              <label className="grid gap-2 text-sm" htmlFor={difficultyLabelId}>
                 <span className="text-muted-foreground">Difficulty</span>
                 <Select
                   value={gameState.difficulty}
                   onValueChange={(value) => onDifficultyChange(value as AIDifficulty)}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full" id={difficultyLabelId}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -106,13 +110,13 @@ export default function GamePanel({
                 </Select>
               </label>
 
-              <label className="grid gap-2 text-sm">
+              <label className="grid gap-2 text-sm" htmlFor={playerLabelId}>
                 <span className="text-muted-foreground">Your Stones</span>
                 <Select
                   value={gameState.humanPlayer}
                   onValueChange={(value) => onHumanPlayerChange(value as Player)}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full" id={playerLabelId}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

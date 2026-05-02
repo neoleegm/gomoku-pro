@@ -1,18 +1,22 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { Stone } from '@/lib/gomokuLogic';
 import { cn } from '@/lib/utils';
 
 interface BoardCellProps {
+  row: number;
+  col: number;
   stone: Stone;
   previewStone: Stone;
   isLastMove: boolean;
   isAiMove: boolean;
   isHoverable: boolean;
-  onClick: () => void;
-  onHover: (isHovering: boolean) => void;
+  onClick: (row: number, col: number) => void;
+  onHover: (row: number, col: number, isHovering: boolean) => void;
 }
 
 function BoardCell({
+  row,
+  col,
   stone,
   previewStone,
   isLastMove,
@@ -23,10 +27,25 @@ function BoardCell({
 }: BoardCellProps) {
   const displayStone = stone ?? previewStone;
 
+  const handleClick = useCallback(() => {
+    onClick(row, col);
+  }, [onClick, row, col]);
+
+  const handleMouseEnter = useCallback(() => {
+    onHover(row, col, true);
+  }, [onHover, row, col]);
+
+  const handleMouseLeave = useCallback(() => {
+    onHover(row, col, false);
+  }, [onHover, row, col]);
+
+  const stoneLabel = displayStone === 'black' ? '黑子' : displayStone === 'white' ? '白子' : '';
+  const ariaLabel = `${row + 1}行${col + 1}列${stoneLabel ? `，${stoneLabel}` : '，空位'}`;
+
   return (
     <button
       type="button"
-      aria-label="Place stone"
+      aria-label={ariaLabel}
       disabled={!isHoverable}
       className={cn(
         'wood-cell relative aspect-square w-full border border-board-line/45 bg-board-cell transition-colors duration-150',
@@ -34,9 +53,9 @@ function BoardCell({
         isHoverable && 'hover:bg-board-hover active:bg-board-active',
         !isHoverable && 'cursor-default'
       )}
-      onClick={onClick}
-      onMouseEnter={() => onHover(true)}
-      onMouseLeave={() => onHover(false)}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {displayStone && (
         <span

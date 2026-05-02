@@ -16,14 +16,14 @@ export default function GomokuBoard({ gameState, humanPlayer, onCellClick }: Gom
     (!gameState.aiThinking && gameState.currentPlayer === humanPlayer);
 
   const handleCellClick = useCallback(
-    (row: number, col: number) => () => {
+    (row: number, col: number) => {
       onCellClick(row, col);
     },
     [onCellClick]
   );
 
   const handleHover = useCallback(
-    (row: number, col: number) => (isHovering: boolean) => {
+    (row: number, col: number, isHovering: boolean) => {
       setHoveredCell(isHovering ? { row, col } : null);
     },
     []
@@ -67,8 +67,10 @@ export default function GomokuBoard({ gameState, humanPlayer, onCellClick }: Gom
                     isLastMove={isLastMove}
                     isAiMove={isAiMove}
                     isHoverable={isHoverable}
-                    onClick={handleCellClick(rowIndex, colIndex)}
-                    onHover={handleHover(rowIndex, colIndex)}
+                    row={rowIndex}
+                    col={colIndex}
+                    onClick={handleCellClick}
+                    onHover={handleHover}
                   />
                 );
               })

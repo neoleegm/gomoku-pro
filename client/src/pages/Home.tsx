@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { getAIMove } from '@/lib/gomokuAI';
 import { useGameAudio } from '@/hooks/useGameAudio';
 import {
@@ -38,6 +38,28 @@ export default function Home() {
     [gameState.humanPlayer]
   );
 
+  const prevStonesPlacedRef = useRef(gameState.stonesPlaced);
+
+  // Sound effects driven by state changes rather than inside setGameState updaters
+  useEffect(() => {
+    const prev = prevStonesPlacedRef.current;
+    const current = gameState.stonesPlaced;
+
+    if (current > prev) {
+      playMove();
+      if (gameState.gameOver && gameState.winner) {
+        if (gameState.winner === gameState.humanPlayer) {
+          playWin();
+        } else {
+          playLoss();
+        }
+      }
+    }
+
+    prevStonesPlacedRef.current = current;
+  }, [gameState.stonesPlaced, gameState.gameOver, gameState.winner, gameState.humanPlayer, playMove, playWin, playLoss]);
+
+
   useEffect(() => {
     const shouldAIMove =
       gameState.gameMode === 'pve' &&
@@ -64,19 +86,10 @@ export default function Home() {
         ) {
           return { ...current, aiThinking: false };
         }
-        const nextState = makeMove({ ...current, aiThinking: false }, aiMove.row, aiMove.col, aiPlayerSnapshot);
-        playMove();
-        if (nextState.gameOver && nextState.winner) {
-          if (nextState.winner === current.humanPlayer) {
-            playWin();
-          } else {
-            playLoss();
-          }
-        }
-        return nextState;
+        return makeMove({ ...current, aiThinking: false }, aiMove.row, aiMove.col, aiPlayerSnapshot);
       });
     }, 280);
-  }, [aiPlayer, gameState, playLoss, playMove, playWin]);
+  }, [aiPlayer, gameState]);
 
   const handleCellClick = (row: number, col: number) => {
     if (
@@ -88,12 +101,6 @@ export default function Home() {
     }
     setGameState((current) => {
       const nextState = makeMove(current, row, col);
-      if (nextState !== current) {
-        playMove();
-        if (nextState.gameOver && nextState.winner) {
-          playWin();
-        }
-      }
       return nextState;
     });
   };
